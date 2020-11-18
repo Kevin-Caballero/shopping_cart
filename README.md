@@ -1,2 +1,3 @@
-# DWES02_TE01
-Carro compra (variables de sesion)
+shopping cart
+
+Carro compra (variables de sesion) en PHP
