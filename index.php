@@ -4,18 +4,29 @@ include('datos.php');
 session_start();
 
 function cantidadTotal($idProducto){
-return isset($_SESSION[$idProducto]) ? $_SESSION[$idProducto] : 0 ;
+    return isset($_SESSION[$idProducto]) ? $_SESSION[$idProducto] : 0 ;
+}
+
+function importeTotal($cantidadTotal, $precioConDescuento){
+    return $cantidadTotal * $precioConDescuento;
 }
 
 if (isset($_POST['enviar'])){
     $idProducto = $_POST["idProducto"];
     $cantidad = $_POST["cantidad"];
-    
+    $totalCarro = 0;
+
     if($cantidad == 0 || $cantidad == ""){
         $_SESSION[$idProducto]=0; 
+        unset($_SESSION["carro"][$idProducto]);
     }else{
         if(isset($_SESSION[$idProducto])){ 
-            $_SESSION[$idProducto]+=$cantidad;              
+            $_SESSION[$idProducto]+=$cantidad; 
+            foreach($productos as $producto){
+                if($producto->getIdProducto() == $idProducto){
+                    $_SESSION["carro"][$idProducto] = $producto;  
+                }
+            }
         }
         else{
           $_SESSION[$idProducto]=$cantidad;
@@ -76,6 +87,41 @@ if (isset($_POST['enviar'])){
                 <?php }?>
             </tbody>
         </table>
+        <div class="container mt-5 mb-5">
+            <div class="row justify-content-center">
+                <div class="col-md-8 ">
+                    <div class="card">
+                        <div class="card-header bg-dark text-white text-center">
+                            <h1>CESTA</h1>
+                        </div>
+                        <div class="card-body">
+                            <table class="table">
+                                <thead class="bg-primary text-white">
+                                    <th>Nombre</th>
+                                    <th>PVP</th>
+                                    <th>Descuento</th>
+                                    <th>Cantidad</th>
+                                    <th>Importe</th>
+                                </thead>
+                                <tbody>
+                                <?php if (isset($_SESSION["carro"])) foreach ($_SESSION["carro"] as $producto) {?>
+                                    <tr>
+                                        <td><?php echo $producto->getNombre() ?></td>
+                                        <td><?php echo $producto->getPvpUnidad() ?></td>
+                                        <td><?php echo $producto->getDescuento() ?></td>
+                                        <td><?php echo cantidadTotal($producto->getIdProducto()) ?></td>
+                                        <td><?php echo importeTotal(cantidadTotal($producto->getIdProducto()), $producto->aplicarDescuento())."€"?></td>
+                                        <?php $totalCarro += importeTotal(cantidadTotal($producto->getIdProducto()), $producto->aplicarDescuento()) ?>
+                                    </tr>
+                                    <?php }?>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="card-footer bg-dark text-white"><h2>Total: <?php echo $totalCarro."€"?></h1></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 
