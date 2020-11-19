@@ -3,33 +3,44 @@ include('datos.php');
 
 session_start();
 
+//funcion que devuelve la cantidad de un producto validando si esta en sesion.
 function cantidadTotal($idProducto){
     return isset($_SESSION[$idProducto]) ? $_SESSION[$idProducto] : 0 ;
 }
 
+//Funcion que devuelve el importe total en relacion a la cantidad de un producto del carro.
 function importeTotal($cantidadTotal, $precioConDescuento){
     return $cantidadTotal * $precioConDescuento;
 }
 
+//se valida si se a pulsado el boton de enviar y por lo tanto se han enviado datos.
 if (isset($_POST['enviar'])){
     $idProducto = $_POST["idProducto"];
     $cantidad = $_POST["cantidad"];
     $totalCarro = 0;
 
-    if($cantidad == 0 || $cantidad == ""){
+    //si el usuario introduce un 0 y clica en enviar...
+    if($cantidad == 0){
+        //se saca del array dicho elemento.
         $_SESSION[$idProducto]=0; 
         unset($_SESSION["carro"][$idProducto]);
+    //por el contrario si introduce un numero...
     }else{
+        //si existe en sesion dicho producto
         if(isset($_SESSION[$idProducto])){ 
+            //añade a la posicion del array de sesion relativa a ese producto la cantidad.
             $_SESSION[$idProducto]+=$cantidad; 
-            foreach($productos as $producto){
-                if($producto->getIdProducto() == $idProducto){
-                    $_SESSION["carro"][$idProducto] = $producto;  
-                }
-            }
         }
+        //si no existe dicho producto en sesion
         else{
-          $_SESSION[$idProducto]=$cantidad;
+            //añade al array un elemento con el id del producto y le asigna la cantidad.
+            $_SESSION[$idProducto]=$cantidad;
+        }
+        //en cualquier caso buscara el producto en el array de productos y lo añadira a la variable carro.
+        foreach($productos as $producto){
+            if($producto->getIdProducto() == $idProducto){
+                $_SESSION["carro"][$idProducto] = $producto;  
+            }
         }
     }
 }
@@ -117,7 +128,11 @@ if (isset($_POST['enviar'])){
                                 </tbody>
                             </table>
                         </div>
-                        <div class="card-footer bg-dark text-white"><h2>Total: <?php echo $totalCarro."€"?></h1></div>
+                        <div class="card-footer bg-dark text-white"><h2>Total: <?php if (isset($totalCarro)) {
+                                    echo $totalCarro."€";
+                                } else{
+                                    echo "0";
+                                }?></h2></div>
                     </div>
                 </div>
             </div>
